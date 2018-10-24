@@ -1,0 +1,30 @@
+<> Linus Torvalds - Wegbereiter für Linux
+
+Die großen PC-Betriebssysteme der heutigen Zeit sind Windows, Max und auf dem sogenannten "Kernel" basierende Linux-
+Distributionen. Der Grundstein dieses Kernels wurde von Linus Benedict Torvalds, welcher am 28. Dezember 1969 in
+Helsinki geboren wurde, gelegt. Mit 11 Jahren kam dieser bereits durch seinen Großvater, Leo Törnqvist, mit dem
+"Commodore VIC-20" in Kontakt, welcher zu den ersten Heimcomputern überhaupt zählt. Die mathematischen Berechnungen
+für die der Großvater diesen Rechner kaufte, durfte Torvalds damals eintippen. Mit diesem begann er auch schon, in
+diesem jungen Alter, eigene Programme zu entwickeln, auf Basis der Computer-Lehrbücher, die er las. Nach der grund-
+legenden Schulbildung und der Lektüre vieler weiterer Fachzeitschriften setzte er seine Ausbildung 1990 mit einem
+Informatik-Studium an der Universität Helsinki fort. Dort begann er auf der Basis von UNIX, einem Betriebssystem von
+Bell Laboratories, sein eigenes Betriebssystem zu entwickeln, dass er "LINUX" taufte. Inspiration dazu gab ihm, nach
+eigenen Aussagen, das Buch "Operating Systems Design and Implementation" (zu deutsch: Betriebssystemdesign und
+Implementierung) von Andrew Tanenbaum, wo dieser von seinem Unix-Klon Minx berichtet und daran die Betriebssystem-
+Prinzipien erläutert. 2 Jahre später veröffentliche Torvalds die Frühversion des Systems zur kostenfreien allgemeinen
+Nutzung im Internet. Das Projekt nahm schnell Fahrt auf und schon bald entwickelte sich das Ganze als kollektives
+Software-Projekt vieler Entwickler weiter. An der Universität Helsinki verschaffte das Torvalds schon bald eine Stelle
+als Forschungsassistent und auch seine Master-Arbeit "Linux, a portable operating system" (zu deutsch: Linux, ein
+portierbares Betriebssystem), welche er 1997 einreichte handelte von seinem neuen Betriebssystem. So wurde er
+schon bald eine anerkannter Spezialist in der Fachwelt. Nach dem Abschluss zog Torvalds nach Silicon Valley wo er bis
+heute lebt. Der Erfolg von Linux nährte in den Folgejahren auch die Debate um die Kommerzialisierung und zunehmende
+Professionalisierung des Internets. 1997 heiratete Torvalds und im September 2018 kündigte Torvalds an sich endlich
+für einige Zeit von der Entwicklung des Betriebssystems zurückzunehmen um sich Zeit für seine Frau Tove und seine 2
+Kinder zu nehmen und seine, auch in den Linux-Foren bekannten, Wütausbrüche in den Griff zu bekommen.
+Linus Torvalds ist ein bedeutender Wegbereiter der Informatik und ein Vorbild für Viele, wie auch für mich.
+Ich habe ihn gewählt, da seine Arbeit und sein Betriebssystem-Kernel für viele heutige Informatik-Projekte eine
+Grundlage bietet und viele Kunstprojekte nur durch seine Arbeit ermöglicht wurden.
+
+>> Quellen
+https://de.wikipedia.org/wiki/Linus_Torvalds, Zuletzt abgerufen: 17.10.2018, 8:01 Uhr
+http://www.whoswho.de/bio/linus-torvalds.html, Zuletzt abgerufen: 17.10.2018, 8:02 Uhr
