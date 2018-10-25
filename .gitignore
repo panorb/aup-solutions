@@ -1,6 +1,7 @@
 *.pdf
 *.tar
 *.zip
+*.s
 
 # Prerequisites
 *.d
