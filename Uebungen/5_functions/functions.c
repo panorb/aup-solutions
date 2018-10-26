@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 // Definition
 unsigned int sum(unsigned int n) {
     unsigned int sum = 0;
@@ -15,7 +13,6 @@ unsigned int sumOdd(unsigned int n) {
     if (n == 0) return 0;
 
     for (int i = 1; i <= 1 + 2*(n-1); i+=2) {
-        printf("i=%d\n", i);
         sum += i;
     }
 
