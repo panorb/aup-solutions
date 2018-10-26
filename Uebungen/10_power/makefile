@@ -1,2 +1,2 @@
-all: helloworld.c
-	gcc -std=c99 -Wall -o helloworld helloworld.c
+all: power.c powertest.c
+	gcc -std=c99 -Wall -o powertest power.c powertest.c
