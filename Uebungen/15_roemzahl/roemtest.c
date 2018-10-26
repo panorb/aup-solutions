@@ -1,10 +1,9 @@
 #include<stdio.h>
 
-unsigned int rom2arab(char);
+unsigned int rom2arab(char*);
+char *arab2rom(unsigned int);
 
 int main() {
-    printf("Hi.");
-    char rom[] = "XVI";
-    printf("ALLES IST BÖSE!");
-    printf("%s in arab is %d", rom, rom2arab(*rom));
+    printf("%s in arab is %d\n", "XVI", rom2arab("XVI"));
+    printf("%d in arab is %s\n", 98, arab2rom(98));
 }
