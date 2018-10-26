@@ -11,11 +11,15 @@ unsigned int sum(unsigned int n) {
 
 unsigned int sumOdd(unsigned int n) {
     unsigned int sum = 0;
-    for (int i = 1; i <= n; i++) {
-        if (n % 2 != 0) sum += i;
-    }
-    return sum;
 
+    if (n == 0) return 0;
+
+    for (int i = 1; i <= 1 + 2*(n-1); i+=2) {
+        printf("i=%d\n", i);
+        sum += i;
+    }
+
+    return sum;
 }
 
 unsigned int digits(unsigned int n) {
@@ -29,12 +33,10 @@ unsigned int digits(unsigned int n) {
 
 unsigned int checksum1(unsigned int n) {
     unsigned int sum = 0;
-    
-    char str[12];
-    sprintf(str, "%d", n);
-
-    for (int i=0; i < digits(n) - 1; i++) {
-        sum += (int)str[i] - 48;
+    while (n != 0) {
+        sum += n % 10;
+        n /= 10;
     }
+
     return sum;
 }
