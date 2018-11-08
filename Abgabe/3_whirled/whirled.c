@@ -6,7 +6,7 @@ const char *whirled(const char * const str); // Deklaration der Aufgabenfunktion
 const char *whirled_step(const char * const str, char * const res, int length, int curIndex); // Deklaration meiner rekusriven Funktion.
 
 int str_len(const char * const str); // Deklaration einer Hilfsfunktion zur Bestimmung der Stringlänge
-int _str_len_step(int *len, const char * const str); // Deklaration meiner rekursiven Funktion für die Bestimmung der Stringlänge
+int str_len_step(int *len, const char * const str); // Deklaration meiner rekursiven Funktion für die Bestimmung der Stringlänge
 
 int main(int carg, const char **varg) {
     if (carg != 2) return -1; // ein Parameter uebergeben?
@@ -48,12 +48,12 @@ const char *whirled_step(const char * const str, char * const res, int length, i
 // Hilfsfunktion - Gibt die Länge des gegeben Strings zurück - des NUL-Bytes
 int str_len(const char * const str) {
     int len = 0;
-    return _str_len_step(&len, str);
+    return str_len_step(&len, str);
 }
 
 // Rekursiver Teil der Hilfsfunktion
-int _str_len_step(int *len, const char * const str) {
+int str_len_step(int *len, const char * const str) {
     if (str[*len] == '\0') return *len;
     (*len)++;
-    return _str_len_step(len, str);
+    return str_len_step(len, str);
 }
