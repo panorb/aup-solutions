@@ -31,7 +31,7 @@ const char *whirled_step(const char * const str, char * const res, int length, i
     char newChar;
 
     if (curChar >= 65 && curChar <= 90) {
-	newChar = 90 - (curChar - 65);
+	    newChar = 90 - (curChar - 65);
     } else if (curChar >= 97 && curChar <= 122) {
         newChar = 122 - (curChar - 97);
     } else {
