@@ -26,18 +26,28 @@ const char *whirled(const char * const str) {
 }
 
 // Rekursiver Teil der Aufgabenfunktion
+/*
+    str -  Ausgangszeichenkette
+    res - Ergebniszeichenkette
+    length - Länge der Zeichenkette
+    curIndex - Index der Zeichenkette der untersucht wird
+*/
 const char *whirled_step(const char * const str, char * const res, int length, int curIndex) {
     char curChar = str[curIndex];
     char newChar;
 
+    // Großbuchstaben ersetzen, d.h. A -> Z, B -> Y usw.
     if (curChar >= 65 && curChar <= 90) {
 	    newChar = 90 - (curChar - 65);
+    // Kleinbuchstaben ersetzen, d.h. a -> z, b -> y usw.
     } else if (curChar >= 97 && curChar <= 122) {
         newChar = 122 - (curChar - 97);
+    // Andere Zeichen werden nicht ersetzt d.h. 1 -> 1, # -> # usw.
     } else {
         newChar = curChar;
     }
 
+    // Umdrehen-Logik für den Ergebnisstring
     res[length - 1 - curIndex] = newChar;
 
     curIndex++;
@@ -45,7 +55,7 @@ const char *whirled_step(const char * const str, char * const res, int length, i
     return whirled_step(str, res, length, curIndex);
 }
 
-// Hilfsfunktion - Gibt die Länge des gegeben Strings zurück - des NUL-Bytes
+// Hilfsfunktion - Gibt die Länge des gegeben Strings zurück ohne das NUL-Byte
 int str_len(const char * const str) {
     int len = 0;
     return str_len_step(&len, str);
