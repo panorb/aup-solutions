@@ -6,8 +6,10 @@ void remove_dots(char *number);
 // void remove_sign(char *number);
 char merge_arithmetic_operator(char operator, char sign);
 
+int find_comma_index(char *number);
 int count_dots(char *number);
 
+char abs_compare(char* numberA, char* numberB);
 int min(int x, int y);
 int max(int x, int y);
 int difference(int x, int y);
@@ -21,6 +23,9 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < (argc / 2) + (argc % 2); i++) {
         printf("(%d) %s\n", i, equation[i]);
+        if (i > 0) {
+            printf("abs_compare: (%d) %c (%d)", i - 1, abs_compare(equation[i - 1], equation[i]), i);
+        }
     }
 
     return 0;
@@ -63,11 +68,49 @@ char** prepare_equation(int argc, char** argv) {
     return equation;
 }
 
-char* addition(char* numberA, char* numberB) {
-    
-}
+/* char* solve(char* numberA, char* numberB) {
+    if (numberA[0] == numberB[0]) {
+        if (numberB[0] == '+') return abs_addition(numberA, numberB, '+'); // positive Zahl plus positive Zahl - d.h. Betragsabs_addition mit positivem Vorzeichen.
+        else return abs_subtraction(numberA, numberB, '-'); // Negative Zahl minus negative Zahl - d.h. Betragsabs_addition mit negativem Vorzeichen.
+    } else {
+        char comparation = abs_compare(numberA, numberB);
+        if (comparation == '=') {
+            // TODO: 0 als Ergebnis zurückgeben.
+        } else if (comparation == '>') { // Wenn die erste Zahl größer ist und...
+            if (numberB[0] == '-') {
+                return abs_subtraction(numberA, numberB, '+'); // ... dieser eine kleinere Zahl abgezogen wird
+            } else {
+                return abs_subtraction(numberB, numberA, '-'); // ... dieser eine kleinere positive Zahl hinzugefügt wird
+            }
+        } else { // Wenn die zweite Zahl größer ist und...
+            if (numberB[0] == '-') { // ... diese minus gerechnet wird von einer kleineren positiven Zahl
+                return abs_subtraction(numberB, numberA, '-');
+            } else {
+                return abs_subtraction(numberB, numberA, '+'); // ... diese zu einer kleineren negativen Zahl plus gerechnet wird
+            }
+        }
+    }
+} */
 
-int is_bigger(char* number, char* compared) {}
+// Vergleicht den Betrag zweier Zahlen.
+char abs_compare(char* numberA, char* numberB) {
+    if (find_comma_index(numberA) == find_comma_index(numberB)) {
+        int lengthA = str_len(numberA);
+        int lengthB = str_len(numberB);
+
+        for (int i = 1; i < min(lengthA, lengthB); i++) {
+            if (numberA[i] > numberB[i]) return '>';
+            if (numberA[i] < numberB[i]) return '<'; // Wenn eine der bei beiden vorhanden Stelle größer oder kleiner ist.
+        }
+        
+        if (lengthA > lengthB) return '>'; // Wenn alle bei beiden vorhanden Stellen identisch sind und eine Zahl mehr Stellen besitzt, dann ist sie größer.
+        if (lengthA < lengthB) return '<'; // Vorraussetzung: Zahlen enden nicht auf reduntanten Nullen -> EBNF in Aufgabenstellung.
+
+        return '=';
+    }
+    else if (find_comma_index(numberA) > find_comma_index(numberB)) return '>';
+    else return '<'; // Wenn der Kommaindex sich unterscheidet, dann ist die Zahl mit mehr Vorkommastellen größer.
+}
 
 // Findet den Index des Kommas in einer Zahl
 int find_comma_index(char *number) {
@@ -75,7 +118,7 @@ int find_comma_index(char *number) {
         if (number[i] == ',') return i;
     }
 
-    return -1;
+    return str_len(number);
 }
 
 // Zählt die Punkte '.' in der Gleichung
@@ -107,19 +150,19 @@ char merge_arithmetic_operator(char operator, char sign) {
     else return '+';
 }
 
-// Gibt den kleineren der beiden Werte zurück
+// Hilfsfunktion - Gibt den kleineren der beiden Werte zurück
 int min(int x, int y) {
     if (x < y) return x;
     else return y;
 }
 
-// Gibt den größeren der beiden Werte zurück
+// Hilfsfunktion - Gibt den größeren der beiden Werte zurück
 int max(int x, int y) {
     if (x > y) return x;
     else return y;
 }
 
-// Gibt die Differenz zwischen den beiden Werten zurück
+// Hilfsfunktion - Gibt die Differenz zwischen den beiden Werten zurück
 int difference(int x, int y) {
     return max(x, y) - min(x, y);
 }
