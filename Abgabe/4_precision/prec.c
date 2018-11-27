@@ -68,7 +68,7 @@ char** prepare_equation(int argc, char** argv) {
     return equation;
 }
 
-/* char* solve(char* numberA, char* numberB) {
+char* solve(char* numberA, char* numberB) {
     if (numberA[0] == numberB[0]) {
         if (numberB[0] == '+') return abs_addition(numberA, numberB, '+'); // positive Zahl plus positive Zahl - d.h. Betragsabs_addition mit positivem Vorzeichen.
         else return abs_subtraction(numberA, numberB, '-'); // Negative Zahl minus negative Zahl - d.h. Betragsabs_addition mit negativem Vorzeichen.
@@ -90,7 +90,19 @@ char** prepare_equation(int argc, char** argv) {
             }
         }
     }
-} */
+}
+
+char* abs_addition(char* numberA, char* numberB) {
+    int lengthA = str_len(numberA);
+    int lenghtB = str_len(numberB);
+
+    char* result = calloc(max(lengthA, lenghtB), sizeof(char));
+
+    int commaIndexA = find_comma_index(numberA);
+    int commaIndexB = find_comma_index(numberB);
+
+    
+}
 
 // Vergleicht den Betrag zweier Zahlen.
 char abs_compare(char* numberA, char* numberB) {
