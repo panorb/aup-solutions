@@ -3,11 +3,9 @@
 
 char** prepare_equation(int argc, char** argv);
 void remove_dots(char *number);
-// void remove_sign(char *number);
 char merge_arithmetic_operator(char operator, char sign);
 
 int find_comma_index(char *number);
-int count_dots(char *number);
 
 char abs_compare(char* numberA, char* numberB);
 int min(int x, int y);
@@ -83,8 +81,8 @@ char* solve(char* numberA, char* numberB) {
                 return abs_subtraction(numberB, numberA, '-'); // ... dieser eine kleinere positive Zahl hinzugefügt wird
             }
         } else { // Wenn die zweite Zahl größer ist und...
-            if (numberB[0] == '-') { // ... diese minus gerechnet wird von einer kleineren positiven Zahl
-                return abs_subtraction(numberB, numberA, '-');
+            if (numberB[0] == '-') {
+                return abs_subtraction(numberB, numberA, '-'); // ... diese minus gerechnet wird von einer kleineren positiven Zahl
             } else {
                 return abs_subtraction(numberB, numberA, '+'); // ... diese zu einer kleineren negativen Zahl plus gerechnet wird
             }
@@ -92,16 +90,51 @@ char* solve(char* numberA, char* numberB) {
     }
 }
 
-char* abs_addition(char* numberA, char* numberB) {
+char* abs_addition(char* numberA, char* numberB, char operator) {
     int lengthA = str_len(numberA);
     int lenghtB = str_len(numberB);
 
-    char* result = calloc(max(lengthA, lenghtB), sizeof(char));
+    int result_size = max(lengthA, lenghtB) + 2;
+    char* result = calloc(result_size, sizeof(char));
 
     int commaIndexA = find_comma_index(numberA);
     int commaIndexB = find_comma_index(numberB);
 
+    int fragmentalDigitsCountA = lengthA - commaIndexA;
+    int fragmentalDigitsCountB = lenghtB - commaIndexB;
+
+    int index = max(lengthA, lenghtB);
+    int indexA = commaIndexA + min(fragmentalDigitsCountA, fragmentalDigitsCountB);
+    int indexB = commaIndexB + min(fragmentalDigitsCountA, fragmentalDigitsCountB);
     
+    int carry = 0;
+
+    while(index > 0) {
+        if (numberA[indexA] == ',') indexA--;
+        if (numberB[indexB] == ',') indexB--;
+        
+        if (indexA > lengthA) {
+            result[index] = numberA[indexA];
+        } else if (indexB > lengthA) {
+            result[index] = numberB[indexB];
+        } else {
+            int digitA = numberA[indexA] - '0';
+            int digitB = numberB[indexB] - '0';
+            int digitResult = digitA + digitB + carry;
+            
+            carry = digitResult / 10;
+            digitResult = digitResult % 10;
+            result[index] = digitResult + '0';
+        }
+
+        index--;
+        indexA--;
+        indexB--;
+    }
+
+    // TODO: Wenn ÜBerlauf stattfindet auf der 1. Stelle müssen die Stellen eins nach rechts verschoben werden und die Zahl davor eingefügt werden
+
+    result[0] = operator;
 }
 
 // Vergleicht den Betrag zweier Zahlen.
@@ -131,17 +164,6 @@ int find_comma_index(char *number) {
     }
 
     return str_len(number);
-}
-
-// Zählt die Punkte '.' in der Gleichung
-int count_dots(char *number) {
-    int count = 0;
-
-    for (int i=1; i < str_len(number); i++) {
-        if (number[i] == '.') count++;
-    }
-
-    return count;
 }
 
 // Entfernt alle '.' aus der Gleichung, die machen später nur Probleme
