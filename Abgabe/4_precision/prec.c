@@ -8,6 +8,8 @@ char merge_arithmetic_operator(char operator, char sign);
 int find_comma_index(char *number);
 
 char abs_compare(char* numberA, char* numberB);
+char* abs_addition(char* numberA, char* numberB, char operator);
+
 int min(int x, int y);
 int max(int x, int y);
 int difference(int x, int y);
@@ -22,7 +24,8 @@ int main(int argc, char **argv) {
     for (int i = 0; i < (argc / 2) + (argc % 2); i++) {
         printf("(%d) %s\n", i, equation[i]);
         if (i > 0) {
-            printf("abs_compare: (%d) %c (%d)", i - 1, abs_compare(equation[i - 1], equation[i]), i);
+            // printf("abs_compare: (%d) %c (%d)\n", i - 1, abs_compare(equation[i - 1], equation[i]), i);
+            printf("abs_addition: (%d) + (%d) = %s\n", i - 1, i, abs_addition(equation[i-1], equation[i], '+'));
         }
     }
 
@@ -59,7 +62,7 @@ char** prepare_equation(int argc, char** argv) {
                 equation[targetIndex][0] = merged_sign;
             }
 
-            remove_dots(equation[targetIndex]);        
+            remove_dots(equation[targetIndex]);
         }
     }
 
@@ -69,72 +72,176 @@ char** prepare_equation(int argc, char** argv) {
 char* solve(char* numberA, char* numberB) {
     if (numberA[0] == numberB[0]) {
         if (numberB[0] == '+') return abs_addition(numberA, numberB, '+'); // positive Zahl plus positive Zahl - d.h. Betragsabs_addition mit positivem Vorzeichen.
-        else return abs_subtraction(numberA, numberB, '-'); // Negative Zahl minus negative Zahl - d.h. Betragsabs_addition mit negativem Vorzeichen.
+        // else return abs_subtraction(numberA, numberB, '-'); // Negative Zahl minus negative Zahl - d.h. Betragsabs_addition mit negativem Vorzeichen.
     } else {
         char comparation = abs_compare(numberA, numberB);
         if (comparation == '=') {
             // TODO: 0 als Ergebnis zurückgeben.
         } else if (comparation == '>') { // Wenn die erste Zahl größer ist und...
             if (numberB[0] == '-') {
-                return abs_subtraction(numberA, numberB, '+'); // ... dieser eine kleinere Zahl abgezogen wird
+                // return abs_subtraction(numberA, numberB, '+'); // ... dieser eine kleinere Zahl abgezogen wird
             } else {
-                return abs_subtraction(numberB, numberA, '-'); // ... dieser eine kleinere positive Zahl hinzugefügt wird
+                // return abs_subtraction(numberB, numberA, '-'); // ... dieser eine kleinere positive Zahl hinzugefügt wird
             }
         } else { // Wenn die zweite Zahl größer ist und...
             if (numberB[0] == '-') {
-                return abs_subtraction(numberB, numberA, '-'); // ... diese minus gerechnet wird von einer kleineren positiven Zahl
+                // return abs_subtraction(numberB, numberA, '-'); // ... diese minus gerechnet wird von einer kleineren positiven Zahl
             } else {
-                return abs_subtraction(numberB, numberA, '+'); // ... diese zu einer kleineren negativen Zahl plus gerechnet wird
+                // return abs_subtraction(numberB, numberA, '+'); // ... diese zu einer kleineren negativen Zahl plus gerechnet wird
             }
         }
     }
+
+    printf("ERROR: Noch nicht gehandelter Fall wurde aufgerufen.\n");
+    return "";
 }
 
 char* abs_addition(char* numberA, char* numberB, char operator) {
-    int lengthA = str_len(numberA);
-    int lenghtB = str_len(numberB);
+    printf("numberA: %s|\n", numberA);
+    printf("numberB: %s|\n", numberB);
 
-    int result_size = max(lengthA, lenghtB) + 2;
-    char* result = calloc(result_size, sizeof(char));
+    int lengthA = str_len(numberA);
+    int lengthB = str_len(numberB);
 
     int commaIndexA = find_comma_index(numberA);
     int commaIndexB = find_comma_index(numberB);
 
-    int fragmentalDigitsCountA = lengthA - commaIndexA;
-    int fragmentalDigitsCountB = lenghtB - commaIndexB;
+    printf("commaIndexA: %d\n", commaIndexA);
+    printf("commaIndexB: %d\n", commaIndexB);
 
-    int index = max(lengthA, lenghtB);
-    int indexA = commaIndexA + min(fragmentalDigitsCountA, fragmentalDigitsCountB);
-    int indexB = commaIndexB + min(fragmentalDigitsCountA, fragmentalDigitsCountB);
-    
+    int fragmentalDigitsCountA = lengthA - (commaIndexA);
+    if (fragmentalDigitsCountA > 0) fragmentalDigitsCountA--;
+
+    int fragmentalDigitsCountB = lengthB - (commaIndexB);
+    if (fragmentalDigitsCountB > 0) fragmentalDigitsCountB--;
+
+    int fragmentalDigitsCountDifference = difference(fragmentalDigitsCountA, fragmentalDigitsCountB);
+
+    printf("fragmentalDigitsCountA: %d\n", fragmentalDigitsCountA);
+    printf("fragmentalDigitsCountB: %d\n", fragmentalDigitsCountB);
+
+    int addedComma = fragmentalDigitsCountA > 0 || fragmentalDigitsCountB > 0 ? 1 : 0;
+
+    int result_size = max(commaIndexA, commaIndexB) + max(fragmentalDigitsCountA, fragmentalDigitsCountB) + addedComma + 3;
+    printf("result_size: %d\n", result_size);
+    char* result = calloc(result_size, sizeof(char));
+
+
+    int index = result_size - 3;
+    printf("starting index: %d\n", index);
+    int indexA = lengthA - 1;
+    int indexB = lengthB - 1;
+
+    for (int i = 0; i < result_size; i++) {
+      result[i] = '~';
+    }
+
+    for (int i = 0; i < fragmentalDigitsCountDifference; i++) {
+      if (fragmentalDigitsCountA > fragmentalDigitsCountB) {
+        result[index] = numberA[indexA];
+        printf("Übernehme ein Digit von A für index=%d.\n", index);
+        printf("Digit: %c\n", numberA[indexA]);
+        indexA--;
+      } else {
+        result[index] = numberB[indexB];
+        printf("Übernehme ein Digit von B für index=%d.\n", index);
+        printf("Digit: %c\n", numberB[indexB]);
+        indexB--;
+      }
+
+      index--;
+    }
+
+    printf("============\n");
+
     int carry = 0;
 
-    while(index > 0) {
-        if (numberA[indexA] == ',') indexA--;
-        if (numberB[indexB] == ',') indexB--;
-        
-        if (indexA > lengthA) {
-            result[index] = numberA[indexA];
-        } else if (indexB > lengthA) {
-            result[index] = numberB[indexB];
-        } else {
-            int digitA = numberA[indexA] - '0';
-            int digitB = numberB[indexB] - '0';
-            int digitResult = digitA + digitB + carry;
-            
-            carry = digitResult / 10;
-            digitResult = digitResult % 10;
-            result[index] = digitResult + '0';
+    while (index > 0) {
+        if (numberA[indexA] == ',' || numberB[indexB] == ',') {
+          result[index] = ',';
+          printf("result[%d]=\',\'\n", index);
+
+          indexA--;
+          indexB--;
+          index--;
+          continue;
         }
+        int digitA;
+        if (indexA <= 0) digitA = 0;
+        else digitA = numberA[indexA] - '0';
+        printf("indexA: %d\n", indexA);
+        printf("digitA: %d\n", digitA);
+
+        int digitB;
+        if (indexB <= 0) digitB = 0;
+        else digitB = numberB[indexB] - '0';
+        printf("indexB: %d\n", indexB);
+        printf("digitB: %d\n", digitB);
+
+        int digitResult = digitA + digitB + carry;
+        printf("digitResult: %d\n", digitResult);
+
+        carry = digitResult / 10;
+        printf("carry: %d\n", carry);
+        digitResult = digitResult % 10;
+        result[index] = digitResult + '0';
+        printf("result[%d]=%c\n", index, result[index]);
 
         index--;
         indexA--;
         indexB--;
     }
 
-    // TODO: Wenn ÜBerlauf stattfindet auf der 1. Stelle müssen die Stellen eins nach rechts verschoben werden und die Zahl davor eingefügt werden
+
+    printf("index: %d\n", index);
+    printf("indexA: %d\n", indexA);
+    printf("indexB: %d\n", indexB);
+
+    // while(index > 0) {
+    //     printf("numberA[indexA=%d]: %c\n", indexA, numberA[indexA]);
+    //     printf("numberB[indexB=%d]: %c\n", indexB, numberB[indexB]);
+    //     if (numberA[indexA] == ',') indexA--;
+    //     if (numberB[indexB] == ',') indexB--;
+    //
+    //     if (indexA > lengthA) {
+    //         result[index] = numberA[indexA];
+    //     } else if (indexB > lengthA) {
+    //         result[index] = numberB[indexB];
+    //     } else {
+    //         int digitA = numberA[indexA] - '0';
+    //         printf("digitA: %d\n", digitA);
+    //         int digitB = numberB[indexB] - '0';
+    //         printf("digitB: %d\n", digitB);
+    //         int digitResult = digitA + digitB + carry;
+    //         printf("digitResult: %d\n", digitResult);
+    //
+    //         carry = digitResult / 10;
+    //         printf("carry: %d\n", carry);
+    //         digitResult = digitResult % 10;
+    //         result[index] = digitResult + '0';
+    //     }
+    //
+    //     index--;
+    //     indexA--;
+    //     indexB--;
+    // }
+
+    // TODO: Nochmal überprüfen. Irgendwas stimmt hier nicht. Ich hab das im Gefühl.
+    printf("carry ist %d\n", carry);
+    if (carry > 0) {
+      for (int i=0; i <= result_size - 2; i++) {
+        result[i + 1] = result[i];
+      }
+
+      result[1] = carry + '0';
+      printf("result[1] ist %c\n", result[1]);
+      result[result_size - 1] = '\0';
+    } else {
+      result[result_size - 2] = '\0';
+    }
 
     result[0] = operator;
+    return result;
 }
 
 // Vergleicht den Betrag zweier Zahlen.
@@ -147,7 +254,7 @@ char abs_compare(char* numberA, char* numberB) {
             if (numberA[i] > numberB[i]) return '>';
             if (numberA[i] < numberB[i]) return '<'; // Wenn eine der bei beiden vorhanden Stelle größer oder kleiner ist.
         }
-        
+
         if (lengthA > lengthB) return '>'; // Wenn alle bei beiden vorhanden Stellen identisch sind und eine Zahl mehr Stellen besitzt, dann ist sie größer.
         if (lengthA < lengthB) return '<'; // Vorraussetzung: Zahlen enden nicht auf reduntanten Nullen -> EBNF in Aufgabenstellung.
 
