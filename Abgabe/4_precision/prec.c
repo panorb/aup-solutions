@@ -168,7 +168,7 @@ char* abs_addition(char* numberA, char* numberB, char operator) {
             else digitB = 0;
 
             int digitResult = digitA + digitB + carry;
-            if (digitResult > 10) {
+            if (digitResult >= 10) {
                 carry = 1;
                 digitResult -= 10;
             } else carry = 0;
