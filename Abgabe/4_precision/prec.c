@@ -39,9 +39,7 @@ int main(int argc, char **argv) {
     }
 
     printf("=> %s\n", result);
-
     free(result);
-
     return 0;
 }
 
