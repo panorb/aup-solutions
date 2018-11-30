@@ -10,37 +10,61 @@ int count_integer_digits(char *number);
 char* solve(char* numberA, char* numberB);
 
 char abs_compare(char* numberA, char* numberB);
-char* abs_addition(char* numberA, char* numberB, char operator);
-char* abs_subtraction(char* numberA, char* numberB, char operator);
+char* abs_computation(char operation, char* numberA, char* numberB, char operator);
+int digit_computation(char operation, int fragmentals, char* result, char* numberA, char* numberB, int index, int indexA, int indexB, int lengthA, int lengthB, int carry);
 
 int count_fragmental_digits(char* number);
 int min(int x, int y);
 int max(int x, int y);
-int difference(int x, int y);
 int str_len(char *str);
 
+void prepare_result(char* result);
+
 int main(int argc, char **argv) {
-    // Mindestens ein Argument, sonst Abbruch
-    if (argc < 2) return -1;
+    if (argc < 2) return -1; // Mindestens ein Argument, sonst Abbruch
 
     char** equation = prepare_equation(argc, argv);
     char* result = equation[0];
 
-    for (int i = 0; i < (argc / 2) + (argc % 2); i++) {
-        printf("(%d) %s\n", i, equation[i]);
+    for (int i = 0; i < argc / 2; i++) {
         if (i > 0) {
-            // printf("abs_compare: (%d) %c (%d)\n", i - 1, abs_compare(equation[i - 1], equation[i]), i);
-            // printf("abs_substraction: (%d) + (%d) = %s\n", i - 1, i, abs_substraction(equation[i-1], equation[i], '+'));
             char* new_result = solve(result, equation[i]);
             free(result);
             result = new_result;
-            printf("solve: (%d) (%d) = %s\n", i - 1, i, result);
         }
     }
 
-    printf("=> %s\n", result);
+    prepare_result(result);
+    printf("%s\n", result);
     free(result);
     return 0;
+}
+
+void prepare_result(char* result) {
+    int hasComma = count_fragmental_digits(result);
+    int length = str_len(result);
+    int endingZeros = 0;
+
+    // Überflüssige Endnullen entfernen und wenn Komma dann alleine steht auch dieses entfernen
+    if (hasComma) {
+        for (int i = length - 1; i > 1; i--) {
+            if (result[i] == '0') endingZeros++;
+            else break;
+        }
+
+        length = length - endingZeros;
+        if (result[length - 1] == ',') length--;
+        
+        result[length] = '\0';
+    }
+
+    // Überflüssiges '+' als Vorzeichen entfernen
+    if (result[0] == '+') {   
+        for (int i=1; i <= length; i++) {
+            result[i-1] = result[i];
+        }
+    }
+
 }
 
 char** prepare_equation(int argc, char** argv) {
@@ -82,8 +106,8 @@ char** prepare_equation(int argc, char** argv) {
 
 char* solve(char* numberA, char* numberB) {
     if (numberA[0] == numberB[0]) {
-        if (numberB[0] == '+') return abs_addition(numberA, numberB, '+'); // positive Zahl plus positive Zahl - d.h. Betragsabs_addition mit positivem Vorzeichen.
-        else return abs_addition(numberA, numberB, '-'); // Negative Zahl minus negative Zahl - d.h. Betragsabs_addition mit negativem Vorzeichen.
+        if (numberB[0] == '+') return abs_computation('+', numberA, numberB, '+'); // positive Zahl plus positive Zahl - d.h. Betragsabs_addition mit positivem Vorzeichen.
+        else return abs_computation('+', numberA, numberB, '-'); // Negative Zahl minus negative Zahl - d.h. Betragsabs_addition mit negativem Vorzeichen.
     } else {
         char comparation = abs_compare(numberA, numberB);
         if (comparation == '=') {
@@ -92,21 +116,21 @@ char* solve(char* numberA, char* numberB) {
             return result;
         } else if (comparation == '>') { // Wenn die erste Zahl größer ist und...
             if (numberB[0] == '-') {
-                return abs_subtraction(numberA, numberB, '+'); // ... dieser eine kleinere Zahl abgezogen wird
+                return abs_computation('-', numberA, numberB, '+'); // ... dieser eine kleinere Zahl abgezogen wird
             } else {
-                return abs_subtraction(numberA, numberB, '-'); // ... dieser eine kleinere positive Zahl hinzugefügt wird
+                return abs_computation('-', numberA, numberB, '-'); // ... dieser eine kleinere positive Zahl hinzugefügt wird
             }
         } else { // Wenn die zweite Zahl größer ist und...
             if (numberB[0] == '-') {
-                return abs_subtraction(numberB, numberA, '-'); // ... diese minus gerechnet wird von einer kleineren positiven Zahl
+                return abs_computation('-', numberB, numberA, '-'); // ... diese minus gerechnet wird von einer kleineren positiven Zahl
             } else {
-                return abs_subtraction(numberB, numberA, '+'); // ... diese zu einer kleineren negativen Zahl plus gerechnet wird
+                return abs_computation('-', numberB, numberA, '+'); // ... diese zu einer kleineren negativen Zahl plus gerechnet wird
             }
         }
     }
 }
 
-char* abs_addition(char* numberA, char* numberB, char operator) {
+char* abs_computation(char operation, char* numberA, char* numberB, char operator) {
     int lengthA = str_len(numberA);
     int lengthB = str_len(numberB);
     
@@ -142,38 +166,21 @@ char* abs_addition(char* numberA, char* numberB, char operator) {
         - 1 // Arrays beginnen bei Null zu zählen
         - 1; // Freigehaltenes Char wird nur bei Überlauf beschrieben, indem der ganze Inhalt des Arrays verschoben wird
 
-    printf("i %d\n", index);
     int indexA = integerDigitsA // Vorkommastellen
         + 1 // evtl. vorhandenes Komma
         + max(fragmentalDigitsA, fragmentalDigitsB); // Maximum der evtl. vorhandenen Nachkommastellen
-    printf("iA %d\n", indexA);
 
     int indexB = integerDigitsB // Vorkommastellen
         + 1 // evtl. vorhandenes Komma
         + max(fragmentalDigitsA, fragmentalDigitsB); // Maximum der evtl. vorhandenen Nachkommastellen
-    printf("iB %d\n", indexB);
 
     /*
     |* NACHKOMMASTELLENRECHNUNG
     */
     int carry = 0; // Übertragsvariable; wird in die Stellenberechnung einbezogen
-    if (resultHasComma == 1) {
+    if (resultHasComma) {
         while (index > max(integerDigitsA, integerDigitsB) + 1) { // Überprüfen ob noch im Kommabereich, nur bei einer Zahl notwendig
-            int digitA;
-            if (indexA < lengthA) digitA = numberA[indexA] - '0';
-            else digitA = 0;
-
-            int digitB;
-            if (indexB < lengthB) digitB = numberB[indexB] - '0';
-            else digitB = 0;
-
-            int digitResult = digitA + digitB + carry;
-            if (digitResult >= 10) {
-                carry = 1;
-                digitResult -= 10;
-            } else carry = 0;
-
-            result[index] = digitResult + '0';
+            carry = digit_computation(operation, 1, result, numberA, numberB, index, indexA, indexB, lengthA, lengthB, carry);
 
             index--;
             indexA--;
@@ -191,30 +198,17 @@ char* abs_addition(char* numberA, char* numberB, char operator) {
     |* VORKOMMASTELLENRECHNUNG
     */
     while (index > 0) {
-        int digitA;
-        if (indexA > 0) digitA = numberA[indexA] - '0';
-        else digitA = 0;
-
-        int digitB;
-        if (indexB > 0) digitB = numberB[indexB] - '0';
-        else digitB = 0;
-
-        int digitResult = digitA + digitB + carry;
-        if (digitResult > 10) {
-            carry = 1;
-            digitResult -= 10;
-        } else carry = 0;
-
-        printf("digitResult(i=%d,iA=%d,iB=%d)=%d\n", index, indexA, indexB, digitResult);
-        result[index] = digitResult + '0';
+        carry = digit_computation(operation, 0, result, numberA, numberB, index, indexA, indexB, lengthA, lengthB, carry);
 
         index--;
         indexA--;
         indexB--;
     }
 
-    // TODO: Carry noch behandeln.
-    if (carry) {
+    /*
+    |* ÜBERLAUFBEHANDELUNG
+    */
+    if (operation == '+' && carry) {
         for (int i = resultLength; i > 1; i--) {
             result[i] = result[i - 1];
         }
@@ -225,114 +219,35 @@ char* abs_addition(char* numberA, char* numberB, char operator) {
     return result;
 }
 
-char* abs_subtraction(char* numberA, char* numberB, char operator) {
-    int lengthA = str_len(numberA);
-    int lengthB = str_len(numberB);
-    
-    int integerDigitsA = count_integer_digits(numberA);
-    int integerDigitsB = count_integer_digits(numberB);
-    
-    int fragmentalDigitsA = count_fragmental_digits(numberA);
-    int fragmentalDigitsB = count_fragmental_digits(numberB);
+int digit_computation(char operation, int fragmentals, char* result, char* numberA, char* numberB, int index, int indexA, int indexB, int lengthA, int lengthB, int carry) {
+    int digitA;
+    if ((fragmentals && indexA < lengthA) || (!fragmentals && indexA > 0)) digitA = numberA[indexA] - '0';
+    else digitA = 0;
 
-    int aHasComma = fragmentalDigitsA > 0 ? 1 : 0;
-    int bHasComma = fragmentalDigitsB > 0 ? 1 : 0;
-    int resultHasComma = aHasComma > 0 || bHasComma > 0 ? 1 : 0;
+    int digitB;
+    if ((fragmentals && indexB < lengthB) || (!fragmentals && indexB > 0)) digitB = numberB[indexB] - '0';
+    else digitB = 0;
 
-    int resultLength = 1 // 1 Char für das übergebene Vorzeichen.
-        + max(integerDigitsA, integerDigitsB) // Maximum an Vorkommastellen der beiden Zahlen
-        + resultHasComma // 1 Char für das evtl. vorhandene Komma
-        + max(fragmentalDigitsA, fragmentalDigitsB) // Maximum der evtl. vorhandenen Nachkommastellen der beiden Zahlen
-        + 1; // Freigehaltenes Char für den eventuellen Überlauf
+    int digitResult;
 
-    char* result = calloc(
-        resultLength
-        + 1 // Das NUL-Byte
-        , sizeof(char));
+    if (operation == '+') {
+        digitResult = digitA + digitB + carry;
 
-    for (int i = 0; i < resultLength - 1; i++) {
-        result[i] = '~';
-    }
+        if (digitResult >= 10) {
+            carry = 1;
+            digitResult -= 10;
+        } else carry = 0;
+    } else {
+        digitResult = digitA - digitB - carry;
 
-    result[0] = operator;
-    result[resultLength - 1] = '\0'; // NUL-Byte; muss bei Überlauf mit verschoben werden
-    
-    int index = resultLength
-        - 1 // Arrays beginnen bei Null zu zählen
-        - 1; // Freigehaltenes Char wird nur bei Überlauf beschrieben, indem der ganze Inhalt des Arrays verschoben wird
-
-    printf("i %d\n", index);
-    int indexA = integerDigitsA // Vorkommastellen
-        + 1 // evtl. vorhandenes Komma
-        + max(fragmentalDigitsA, fragmentalDigitsB); // Maximum der evtl. vorhandenen Nachkommastellen
-    printf("iA %d\n", indexA);
-
-    int indexB = integerDigitsB // Vorkommastellen
-        + 1 // evtl. vorhandenes Komma
-        + max(fragmentalDigitsA, fragmentalDigitsB); // Maximum der evtl. vorhandenen Nachkommastellen
-    printf("iB %d\n", indexB);
-
-    /*
-    |* NACHKOMMASTELLENRECHNUNG
-    */
-    int carry = 0; // Übertragsvariable; wird in die Stellenberechnung einbezogen
-    if (resultHasComma == 1) {
-        while (index > max(integerDigitsA, integerDigitsB) + 1) { // Überprüfen ob noch im Kommabereich, nur bei einer Zahl notwendig
-            int digitA;
-            if (indexA < lengthA) digitA = numberA[indexA] - '0';
-            else digitA = 0;
-
-            int digitB;
-            if (indexB < lengthB) digitB = numberB[indexB] - '0';
-            else digitB = 0;
-
-            int digitResult = digitA - digitB - carry;
-            if (digitResult < 0) {
-                carry = 1;
-                digitResult += 10;
-            } else carry = 0;
-
-            result[index] = digitResult + '0';
-
-            index--;
-            indexA--;
-            indexB--;
-        }
-
-        result[index] = ',';
-        index--;
-    }
-
-    indexA--;
-    indexB--;
-        
-    /*
-    |* VORKOMMASTELLENRECHNUNG
-    */
-    while (index > 0) {
-        int digitA;
-        if (indexA > 0) digitA = numberA[indexA] - '0';
-        else digitA = 0;
-
-        int digitB;
-        if (indexB > 0) digitB = numberB[indexB] - '0';
-        else digitB = 0;
-
-        int digitResult = digitA - digitB - carry;
         if (digitResult < 0) {
             carry = 1;
             digitResult += 10;
         } else carry = 0;
-
-        printf("digitResult(i=%d,iA=%d,iB=%d)=%d\n", index, indexA, indexB, digitResult);
-        result[index] = digitResult + '0';
-
-        index--;
-        indexA--;
-        indexB--;
     }
-    
-    return result;
+
+    result[index] = digitResult + '0';
+    return carry;
 }
 
 int count_fragmental_digits(char* number) {
@@ -404,19 +319,10 @@ int max(int x, int y) {
     else return y;
 }
 
-// Hilfsfunktion - Gibt die Differenz zwischen den beiden Werten zurück
-int difference(int x, int y) {
-    return max(x, y) - min(x, y);
-}
-
 // Hilfsfunktion - Gibt die Länge des gegeben Strings zurück ohne das NUL-Byte
 int str_len(char *str) {
     int len = 0;
     while (str[len] != '\0') {
-        if (len > STRING_LENGTH_SEARCH_LIMIT) {
-            printf("ERROR: Suchbereichende erreicht. Kein \\0 (NUL-Byte) gefunden.\n");
-            return 0;
-        }
         len++;
     }
     return len;
