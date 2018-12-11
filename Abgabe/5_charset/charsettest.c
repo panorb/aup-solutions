@@ -14,7 +14,7 @@ int main() {
     char *str1 = charset_tos(s1);
     printf("str1=\"%s\"\n",str1); // ergibt: ”aHlo”
 
-    charset_op(s1,s2,CS_CUT);
+    printf("r: %d\n", charset_op(s1,s2,CS_SYMDIFF));
     char *str2 = charset_tos(s1);
 
     printf("str2=\"%s\"\n",str2); // ergibt: ”AaBbCcHlo”
