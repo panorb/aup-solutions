@@ -109,7 +109,6 @@ segment_t *get_segments(sprite_t sprite, int *length) {
       // Ein Kreis besitzt keine Segmente.
       if (length != NULL) *length = 0;
       segments = NULL;
-      printf("Not implemented.");
       break;
     case SHAPE_RECTANGLE:
       // Ein Rechteck besteht aus 4 Segmenten.
@@ -217,9 +216,15 @@ int circle_circle_intersection(circle_t circle_a, circle_t circle_b, point_t *in
   double h = sqrt(pow(circle_a.radius, 2) - pow(a, 2));
 
   point_t p2 = vec_add(circle_a.anchor, vec_multiply(dif_vec, a / d));
-  point_t p31 = vec_add(p2, vec_multiply(dif_vec, h/d));
-  point_t p32 = vec_add(p2, vec_multiply(dif_vec, -(h/d)));
+  
+  point_t p31;
+  p31.x = p2.x + h * dif_vec.y / d;
+  p31.y = p2.y - h * dif_vec.x / d;
 
+  point_t p32;
+  p32.x = p2.x - h * dif_vec.y / d;
+  p32.y = p2.y + h * dif_vec.x / d;
+  
   intersect[0] = p31;
 
   if (p31.x == p32.x && p31.y == p32.y) {
@@ -230,8 +235,52 @@ int circle_circle_intersection(circle_t circle_a, circle_t circle_b, point_t *in
   return 2;
 }
 
-bool circle_segment_intersection(circle_t circle, segment_t segment) {
+int circle_segment_intersection(circle_t circle, segment_t segment, point_t *intersect) {
+  double a = pow(direction(segment).x, 2) + pow(direction(segment).y, 2);
+  double b = 2 * (direction(segment).x * (segment.point_a.x - circle.anchor.x) + direction(segment).y * (segment.point_a.y - circle.anchor.y));
+  double c = pow(circle.anchor.x, 2) + pow(circle.anchor.y, 2);
+  c += pow(segment.point_a.x, 2) + pow(segment.point_a.y, 2);
+  c -= 2 * (circle.anchor.x * segment.point_a.x + circle.anchor.y * segment.point_a.y);
+  c -= pow(circle.radius, 2);
+
+  if (pow(b, 2) - 4 * a * c < 0) { // Keine Überschneidung
+    return 0;
+  }
+
+  double s = (-b + sqrt(pow(b, 2) - 4 * a * c)) / (2 * a);
+  double t = (-b - sqrt(pow(b, 2) - 4 * a * c)) / (2 * a);
+
+  if ((s < 0 || s > 1) && (t < 0 || t > 1)) {
+    return 0; // Keine Überschneidung
+  }
+
+  point_t p1 = vec_add(segment.point_a, vec_multiply(direction(segment), s));
+  point_t p2 = vec_add(segment.point_a, vec_multiply(direction(segment), t));
+
   
+
+  if ((s >= 0 && s <= 1) && (t < 0 || t > 1)) {
+    intersect[0] = p1;
+    printf("(%f, %f)\n", p1.x, p1.y);
+    return 1;
+  } else if ((t >= 0 && t <= 1) && (s < 0 || s > 1)) {
+    intersect[0] = p2;
+    printf("(%f, %f)\n", p2.x, p2.y);
+    return 1;
+  } // Ein Schnitt; Segment endet im Kreis
+
+  if (s == t && (s >= 0 && s <= 1)) {
+    intersect[0] = p1;
+    printf("(%f, %f)\n", p1.x, p1.y);
+    return 1;
+  } // Ein Schnitt; Segment berührt Kreis tangential
+
+  intersect[0] = p1;
+  intersect[1] = p2;
+  
+  printf("(%f, %f)\n", p1.x, p1.y);
+  printf("(%f, %f)\n", p2.x, p2.y);
+  return 2; // Zwei Schnitte; Normalfall
 }
 
 // Quelle für den Lösungsansatz: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Intersection_of_two_lines
@@ -273,11 +322,18 @@ point_t *cutpoints(sprite_t sprite_a, sprite_t sprite_b, int *num) {
   if (length_a == 0 && length_b == 0) {
     // circle - circle intersection
     point_t *intersect = calloc(2, sizeof(point_t));
-    *num = circle_circle_intersection(get_circle(sprite_a.points[0], sprite_a.points[1], sprite_a.points[2]), get_circle(sprite_b.points[0], sprite_b.points[1], sprite_b.points[2]), &intersect);
+    *num = circle_circle_intersection(get_circle(sprite_a.points[0], sprite_a.points[1], sprite_a.points[2]), get_circle(sprite_b.points[0], sprite_b.points[1], sprite_b.points[2]), intersect);
     return intersect;
   } else if (length_a > 0 && length_b == 0) {
     // segment - circle intersection
-    printf("Not implemented.\n");
+    circle_t circle = get_circle(sprite_b.points[0], sprite_b.points[1], sprite_b.points[2]);
+
+    point_t* intersect = calloc(2, sizeof(point_t));
+
+    for (int i = 0; i < length_a; i++) {
+      *num += circle_segment_intersection(circle, segments_a[i], intersect);
+    }
+    
     return NULL;
   } else if (length_a == 0 && length_b > 0) {
     // circle - segment intersection
@@ -303,19 +359,23 @@ point_t *cutpoints(sprite_t sprite_a, sprite_t sprite_b, int *num) {
 
 int main()
 {
-    // printf("-----------\n");
-    // sprite_t sprite_a = {SHAPE_TRIANGLE, {{-1.0, -2.0}, {0.0, 1.0}, {1.0, -2.0}}};
-    // sprite_t sprite_a = {SHAPE_TRIANGLE, {{-1.0, -2.0}, {0.0, 1.0}, {1.0, -2.0}}};
-    // sprite_t sprite_b = {SHAPE_RECTANGLE, {{-1.0, 0.0}, {-1.0, 1.0}, {1.0, 1.0}}};
-    // sprite_t sprite_b = {SHAPE_RECTANGLE, {{-1.0, 0.0}, {-1.0, -1.0}, {1.0, -1.0}}};
-
     printf("-----------\n");
-    point_t p1 = {0.0, 1.0};
-    point_t p2 = {0.0, -1.0};
-    point_t p3 = {-1.0, 0.0};
-    get_circle(p1, p2, p3);
-    // int num;
-    // cutpoints(sprite_a, sprite_b, &num);
+    // Kreis - Kreis-Schnitt
+    // sprite_t sprite_a={SHAPE_CIRCLE, {{0.0, 2.0}, {0.0, -2.0}, {2.0, 0.0}}};
+    // sprite_t sprite_b={SHAPE_CIRCLE, {{5.0, 0.0}, {3.0, 2.0}, {3.0, -2.0}}};
+
+    // Kreis - Segment-Schnitt    
+    sprite_t sprite_b={SHAPE_CIRCLE, {{0.0, 1.0}, {0.0, -1.0}, {-1.0, 0.0}}};
+    sprite_t sprite_a={SHAPE_RECTANGLE, {{0.0, 2.0}, {2.0, 1.0}, {2.0, 2.0}}};
+
+    int num;
+    point_t *res = cutpoints(sprite_a, sprite_b, &num);
+
+    printf("Schnittpunkte:\n");
+    for (int i = 0; i < num; i++) {
+      printf("(%f, %f)\n", res[i].x, res[i].y);
+    }
+
     return 0;
 }
 
